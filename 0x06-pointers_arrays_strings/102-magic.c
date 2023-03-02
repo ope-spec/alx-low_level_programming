@@ -1,11 +1,8 @@
 #include<stdio.h>
 /**
-*main - magic in c
-*description - prints an integer.
+*main - print integer 98
 *
-* @p[5] = 98 :print out 98
-*
-* Return: Always 0 (success).
+*Return: 0 Always.
 */
 int main(void)
 {
@@ -23,7 +20,7 @@ p = &n;
    * - only one statement
    * - you are not allowed to code anything else than this line of code
    */
-p[5] = 98;
+*(p + 5) = 98;
   /* ...so that this prints 98\n */
 printf("a[2] = %d\n", a[2]);
 return (0);
