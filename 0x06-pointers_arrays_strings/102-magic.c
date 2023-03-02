@@ -1,8 +1,7 @@
-#include<stdio.h>
+#include <stdio.h>
 /**
-*main - print integer 98
-*
-*Return: 0 Always.
+* main - prints a[2] = 98.
+* Return: 0 Always.
 */
 int main(void)
 {
