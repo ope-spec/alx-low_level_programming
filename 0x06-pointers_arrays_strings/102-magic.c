@@ -1,11 +1,11 @@
 #include<stdio.h>
 /**
-*main - Entry point
+*main - magic in c
+*description - prints an integer.
 *
-*Description: 'magic in c'
-*@p[5] = 98 :print out 98
+* @p[5] = 98 :print out 98
 *
-*Return: Always 0 (Success)
+* Return: Always 0 (success).
 */
 int main(void)
 {
