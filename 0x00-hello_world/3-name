@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Check that a file name has been provided
+if [ -z "$CFILE" ]; then
+  echo "No C file specified"
+  exit 1
+fi
+
+# Compile the C file and create the executable
+gcc "$CFILE" -o cisfun

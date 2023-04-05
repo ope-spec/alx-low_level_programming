@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Check if the $CFILE variable is set
+if [ -z "$CFILE" ]; then
+  echo "Error: CFILE variable not set"
+  exit 1
+fi
+
+# Set the output file name
+ASM_FILE="${CFILE%.*}.s"
+
+# Generate the assembly code of the C file and save it to the output file
+gcc -S -masm=intel -o $ASM_FILE $CFILE

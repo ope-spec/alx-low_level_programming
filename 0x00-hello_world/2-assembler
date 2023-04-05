@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Check that a file name has been provided
+if [ -z "$CFILE" ]; then
+  echo "No C file specified"
+  exit 1
+fi
+
+# Generate assembly code and save the output to a file
+gcc -S "$CFILE" -o output.s
