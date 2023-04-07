@@ -20,14 +20,14 @@ unsigned int binary_to_uint(const char *b)
 	for (length = 0; b[length] != '\0'; length++)
 		;
 
-	for (length--, base_two = 1; length >= 0; lenth--, base_two *= 2)
+	for (length--, base_two = 1; length >= 0; length--, base_two *= 2)
 	{
-		if (b[lenth] != '0' && b[lenth] != '1')
+		if (b[length] != '0' && b[length] != '1')
 		{
 			return (0);
 		}
 
-		if (b[lenth] & 1)
+		if (b[length] & 1)
 		{
 			ui += base_two;
 		}
