@@ -17,16 +17,20 @@ unsigned int binary_to_uint(const char *b)
 
     i = 0;
 
-    for (length = 0; b[length] != '\0'; length++);
-
-    for (length--, j = 1; length >= 0; length--, j *= 2)
+    length = 0;
+    while (b[length] != '\0')
     {
-        if (b[length] != '0' && b[length] != '1')
+        length++;
+    }
+
+    for (j = 1; length > 0; length--, j *= 2)
+    {
+        if (b[length - 1] != '0' && b[length - 1] != '1')
         {
             return (0);
         }
 
-        if (b[length] & 1)
+        if (b[length - 1] == '1')
         {
             i += j;
         }
