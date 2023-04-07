@@ -1,9 +1,6 @@
 #include "main.h"
 
 /**
-* to replace: ^\s+
-* 
-*
 * binary_to_uint - converts a binary number to an unsigned int
 * @b: pointer to the binary number
 *
@@ -33,4 +30,21 @@ return (0);
 }
 
 return (num);
+}
+
+int main(void)
+{
+unsigned int n;
+
+n = binary_to_uint("1");
+printf("%u\n", n);
+n = binary_to_uint("101");
+printf("%u\n", n);
+n = binary_to_uint("1e01");
+printf("%u\n", n);
+n = binary_to_uint("1100010");
+printf("%u\n", n);
+n = binary_to_uint("0000000000000000000110010010");
+printf("%u\n", n);
+return (0);
 }
