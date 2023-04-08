@@ -6,114 +6,108 @@
 
 #define BUF_SIZE 1024
 
-char *create_buffer(char *file);
+char *create_buf(char *f);
 void close_file(int fd);
 
 /**
- * create_buffer - Allocates 1024 bytes for a buffer.
- * @file: The name of the file buffer is storing chars for.
- *
- * Return: A pointer to the newly-allocated buffer.
- */
-char *create_buffer(char *file)
+* create_buf - Allocates a buffer of size BUF_SIZE 
+* for reading and writing files.
+* 
+* @f: The name of the file in which the buffer is storing characters.
+* 
+* return - A pointer to the newly allocated buffer.
+*/
+char *create_buf(char *f)
 {
-	char *buffer;
+char *buf;
 
-	buffer = malloc(sizeof(char) * BUF_SIZE);
+buf = malloc(sizeof(char) * BUF_SIZE);
 
-	if (buffer == NULL)
-	{
-		dprintf(STDERR_FILENO,
-			"Error: Can't write to %s\n", file);
-		exit(99);
-	}
+if (buf == NULL)
+{
+dprintf(STDERR_FILENO, "Error: Can't write to %s\n", f);
+exit(99);
+}
 
-	return (buffer);
+return (buf);
 }
 
 /**
- * close_file - Closes file descriptors.
- * @fd: The file descriptor to be closed.
- */
+* close_file - Closes a file descriptor.
+* 
+* @fd: The file descriptor to be closed.
+* 
+*/
 void close_file(int fd)
 {
-	if (close(fd) == -1)
-	{
-		dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", fd);
-		exit(100);
-	}
+if (close(fd) == -1)
+{
+dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", fd);
+exit(100);
+}
 }
 
 /**
- * main - Copies the contents of a file to another file.
- * @argc: The number of arguments supplied to the program.
- * @argv: An array of pointers to the arguments.
- *
- * Return: 0 on success.
- *
- * Description: If the argument count is incorrect - exit code 97.
- *              If file_from does not exist or cannot be read - exit code 98.
- *              If file_to cannot be created or written to - exit code 99.
- *              If file_to or file_from cannot be closed - exit code 100.
- */
+* main: Entry point of the program.
+* 
+* @argc: Number of command-line arguments.
+* @argv: Array of command-line arguments.
+* 
+* return - Always returns 0.
+*/
 int main(int argc, char *argv[])
 {
-	int from, to, r, w;
-	char *buffer;
+int file_from, file_to, num_read, num_written;
+char *buf;
 
-	if (argc != 3)
-	{
-		dprintf(STDERR_FILENO, "Usage: cp file_from file_to\n");
-		exit(97);
-	}
+if (argc != 3)
+{
+dprintf(STDERR_FILENO, "Usage: cp from file_to\n");
+exit(97);
+} 
 
-	buffer = create_buffer(argv[2]);
-	from = open(argv[1], O_RDONLY);
-	if (from == -1)
-	{
-		dprintf(STDERR_FILENO,
-			"Error: Can't read from file %s\n", argv[1]);
-		free(buffer);
-		exit(98);
-	}
+buf = create_buf(argv[2]);
+file_from = open(argv[1], O_RDONLY);
+if (file_from == -1)
+{
+dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", argv[1]);
+free(buf);
+exit(98);
+}
+file_to = open(argv[2], O_CREAT | O_WRONLY | O_TRUNC, 0664); 
+if (file_to == -1)
+{
+dprintf(STDERR_FILENO,"Error: Can't write to %s\n", argv[2]);
+free(buf);
+close_file(file_from);
+exit(99);
+}
 
-	to = open(argv[2], O_CREAT | O_WRONLY | O_TRUNC, 0664);
-	if (to == -1)
-	{
-		dprintf(STDERR_FILENO,
-			"Error: Can't write to %s\n", argv[2]);
-		free(buffer);
-		close_file(from);
-		exit(99);
-	}
+while ((num_read = read(file_from, buf, BUF_SIZE)) > 0) 
+{
+num_written = write(file_to, buf, num_read);
+if (num_written == -1)
+{
+dprintf(STDERR_FILENO,"Error: Can't write to %s\n", argv[2]);
+free(buf);
+close_file(file_from);
+close_file(file_to);
+exit(99);
+}
+}
 
-	while ((r = read(from, buffer, BUF_SIZE)) > 0)
-	{
-		w = write(to, buffer, r);
-		if (w == -1)
-		{
-			dprintf(STDERR_FILENO,
-				"Error: Can't write to %s\n", argv[2]);
-			free(buffer);
-			close_file(from);
-			close_file(to);
-			exit(99);
-		}
-	}
+if (num_read == -1)
+{
+dprintf(STDERR_FILENO,"Error: Can't read from file %s\n", argv[1]);
+free(buf);
+close_file(file_from);
+close_file(file_to);
+exit(98);
+}
 
-	if (r == -1)
-	{
-		dprintf(STDERR_FILENO,
-			"Error: Can't read from file %s\n", argv[1]);
-		free(buffer);
-		close_file(from);
-		close_file(to);
-		exit(98);
-	}
+free(buf);
+close_file(file_from);
+close_file(file_to);
 
-	free(buffer);
-	close_file(from);
-	close_file(to);
-
-	return (0);
+return (0);
 }
