@@ -1,118 +1,119 @@
 #include "main.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#define BUF_SIZE 1024
+
+char *create_buffer(char *file);
+void close_file(int fd);
 
 /**
-* create_buffer - Define a buffer of size 1024 for reading and writing files.
-* @exit_with_error: A function that prints an error message
-* and exits with a non-zero
-* exit code if an error occurs during a file o.
-* @exit_with_error function is called to print an
-* error message and exit with a non-zero
-* exit code.
-*
-* Return: A pointer to the newly allocated buffer.
-*/
-void create_buffer(void (*exit_with_error)(const char *, const char *, int));
+ * create_buffer - Allocates 1024 bytes for a buffer.
+ * @file: The name of the file buffer is storing chars for.
+ *
+ * Return: A pointer to the newly-allocated buffer.
+ */
+char *create_buffer(char *file)
+{
+	char *buffer;
+
+	buffer = malloc(sizeof(char) * BUF_SIZE);
+
+	if (buffer == NULL)
+	{
+		dprintf(STDERR_FILENO,
+			"Error: Can't write to %s\n", file);
+		exit(99);
+	}
+
+	return (buffer);
+}
 
 /**
-* exit_with_error - Print an error message
-* and exit with a non-zero exit code.
-* @file_path: The path of the file that caused the error.
-* @o: The o that failed (e.g., "read from", "write to").
-* @exit_code: The exit code to use when exiting.
-*
-* This function prints an error message to
-* standard error describing the file o
-* that failed and the path of the file that caused the error.
-* It then exits the program
-* with the provided exit code.
-*
-* Return: This function does not return.
-*/
-void exit_with_error(const char *file_path, const char *o, int exit_code);
+ * close_file - Closes file descriptors.
+ * @fd: The file descriptor to be closed.
+ */
+void close_file(int fd)
+{
+	if (close(fd) == -1)
+	{
+		dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", fd);
+		exit(100);
+	}
+}
 
 /**
-* main - Entry point of the program.
-* @argc: Number of command-line arguments.
-* @argv: Array of command-line arguments.
-*
-* This function is the entry point of the program.
-* It reads two file paths as command-line
-* arguments and attempts to copy the contents
-* of the first file to the second file. If an
-* error occurs during any of the file os,
-* the program calls the exit_with_error
-* function to print an error message
-* and exit with a non-zero exit code.
-*
-* Return: Always returns 0.
-*/
+ * main - Copies the contents of a file to another file.
+ * @argc: The number of arguments supplied to the program.
+ * @argv: An array of pointers to the arguments.
+ *
+ * Return: 0 on success.
+ *
+ * Description: If the argument count is incorrect - exit code 97.
+ *              If file_from does not exist or cannot be read - exit code 98.
+ *              If file_to cannot be created or written to - exit code 99.
+ *              If file_to or file_from cannot be closed - exit code 100.
+ */
 int main(int argc, char *argv[])
 {
-if (argc < 3)
-{
-fprintf(stderr, "Usage: %s <source_file> <destination_file>\n", argv[0]);
-exit(1);
-}
+	int from, to, r, w;
+	char *buffer;
 
-int src_fd = open(argv[1], O_RDONLY);
-if (src_fd == -1)
-{
-exit_with_error(argv[1], "read from", 2);
-}
+	if (argc != 3)
+	{
+		dprintf(STDERR_FILENO, "Usage: cp file_from file_to\n");
+		exit(97);
+	}
 
-int dst_fd = open(argv[2], O_WRONLY | O_CREAT | O_TRUNC, 0644);
-if (dst_fd == -1)
-{
-exit_with_error(argv[2], "write to", 3);
-}
+	buffer = create_buffer(argv[2]);
+	from = open(argv[1], O_RDONLY);
+	if (from == -1)
+	{
+		dprintf(STDERR_FILENO,
+			"Error: Can't read from file %s\n", argv[1]);
+		free(buffer);
+		exit(98);
+	}
 
-char buf[1024];
-ssize_t num_read;
+	to = open(argv[2], O_CREAT | O_WRONLY | O_TRUNC, 0664);
+	if (to == -1)
+	{
+		dprintf(STDERR_FILENO,
+			"Error: Can't write to %s\n", argv[2]);
+		free(buffer);
+		close_file(from);
+		exit(99);
+	}
 
-while ((num_read = read(src_fd, buf, sizeof(buf))) > 0)
-{
-ssize_t num_written = write(dst_fd, buf, num_read);
+	while ((r = read(from, buffer, BUF_SIZE)) > 0)
+	{
+		w = write(to, buffer, r);
+		if (w == -1)
+		{
+			dprintf(STDERR_FILENO,
+				"Error: Can't write to %s\n", argv[2]);
+			free(buffer);
+			close_file(from);
+			close_file(to);
+			exit(99);
+		}
+	}
 
-if (num_written == -1)
-{
-exit_with_error(argv[2], "write to", 4);
-}
-}
+	if (r == -1)
+	{
+		dprintf(STDERR_FILENO,
+			"Error: Can't read from file %s\n", argv[1]);
+		free(buffer);
+		close_file(from);
+		close_file(to);
+		exit(98);
+	}
 
-if (num_read == -1)
-{
-exit_with_error(argv[1], "read from", 2);
-}
+	free(buffer);
+	close_file(from);
+	close_file(to);
 
-if (close(src_fd) == -1)
-{
-fprintf(stderr, "Error: Failed to close file %s\n", argv[1]);
-exit(5);
-}
-
-if (close(dst_fd) == -1)
-{
-fprintf(stderr, "Error: Failed to close file %s\n", argv[2]);
-exit(5);
-}
-
-return (0);
-}
-/**
-* exit_with_error - Print an error message
-* and exit with a non-zero exit code.
-* @file_path: The path of the file that caused the error
-* @o: The o that failed
-* @exit_code: The exit code to use when exiting.
-* This function prints an error message
-* to standard error describing the file operation
-* that failed and the path of the file that caused the error.
-* It then exits the program
-* with the provided exit code.
-* Return: This function does not return.
-*/
-void exit_with_error(const char *file_path, const char *o, int exit_code)
-{
-fprintf(stderr, "Error: Failed to %s file %s\n", o, file_path);
-exit(exit_code);
+	return (0);
 }
