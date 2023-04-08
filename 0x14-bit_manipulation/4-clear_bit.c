@@ -11,11 +11,10 @@ int clear_bit(unsigned long int *n, unsigned int index)
 {
 	/* check if index is greater than the number of bits in unsigned long int */
 	if (index >= (sizeof(unsigned long int) * 8))
-    {
-        return (-1);
-    }
+{
+		return (-1);
+	}
 
-	/* clear bit at the given index by ANDing with complement of bit shifted left */
 	*n &= ~(1UL << index);
 
 	return (1);
