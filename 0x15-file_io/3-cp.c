@@ -7,58 +7,50 @@
  * 
 ***/
 
-#define BUFFER_SIZE 1024
+int main(int argc, char *argv[]) {
+    int file_from, file_to;
+    ssize_t bytes_read, bytes_written;
+    char buffer[1024];
 
-/**
- * error - function that prints error messages and exits with a status code
- * @exit_code: the exit status code
- * @message: the error message to print
- */
-void error(int exit_code, char *message)
-{
-	dprintf(STDERR_FILENO, "%s\n", message);
-	exit(exit_code);
-}
+    if (argc != 3) {
+        printf("Usage: cp file_from file_to\n");
+        exit(EXIT_FAILURE);
+    }
 
-/**
- * main - program that copies the content of a file to another file
- * @argc: the number of arguments
- * @argv: the array of arguments
- * Return: 0 on success
- */
-int main(int argc, char **argv)
-{
-	int fd_from, fd_to, rd, wr, close_status;
-	char buffer[BUFFER_SIZE];
+    file_from = open(argv[1], O_RDONLY);
+    if (file_from == -1) {
+        printf("Error: Can't read from file %s. %s\n", argv[1], strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
-	if (argc != 3)
-		error(97, "Usage: cp file_from file_to");
+    file_to = open(argv[2], O_CREAT | O_WRONLY | O_TRUNC, 0664);
+    if (file_to == -1) {
+        printf("Error: Can't write to %s. %s\n", argv[2], strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
-	fd_from = open(argv[1], O_RDONLY);
-	if (fd_from == -1)
-		error(98, "Error: Can't read from file %s", argv[1]);
+    while ((bytes_read = read(file_from, buffer, sizeof(buffer))) > 0) {
+        bytes_written = write(file_to, buffer, bytes_read);
+        if (bytes_written != bytes_read) {
+            printf("Error: Failed to write to %s. %s\n", argv[2], strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+    }
 
-	fd_to = open(argv[2], O_WRONLY | O_CREAT | O_TRUNC, 0664);
-	if (fd_to == -1)
-		error(99, "Error: Can't write to %s", argv[2]);
+    if (bytes_read == -1) {
+        printf("Error: Failed to read from %s. %s\n", argv[1], strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
-	while ((rd = read(fd_from, buffer, BUFFER_SIZE)) > 0)
-	{
-		wr = write(fd_to, buffer, rd);
-		if (wr != rd)
-			error(99, "Error: Can't write to %s", argv[2]);
-	}
+    if (close(file_from) == -1) {
+        printf("Error: Can't close file descriptor for %s. %s\n", argv[1], strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
-	if (rd == -1)
-		error(98, "Error: Can't read from file %s", argv[1]);
+    if (close(file_to) == -1) {
+        printf("Error: Can't close file descriptor for %s. %s\n", argv[2], strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
-	close_status = close(fd_from);
-	if (close_status == -1)
-		error(100, "Error: Can't close fd %d", fd_from);
-
-	close_status = close(fd_to);
-	if (close_status == -1)
-		error(100, "Error: Can't close fd %d", fd_to);
-
-	return (0);
+    return 0;
 }
