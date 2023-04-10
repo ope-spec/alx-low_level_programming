@@ -6,9 +6,11 @@
 #include <stddef.h>
 #include <errno.h>
 #include <stdio.h>
-#include <stdlib.h>  // for exit()
-#include <fcntl.h>   // for open(), O_RDONLY, O_CREAT, O_WRONLY, O_TRUNC, O_APPEND
-#include <unistd.h>  // for read(), write(), close()
+#include <stdlib.h>  
+#include <fcntl.h>   
+#include <unistd.h>  
+#include <string.h>
+
 #define BUFFER_SIZE 1024
 
 ssize_t read_textfile(const char *filename, size_t letters);
