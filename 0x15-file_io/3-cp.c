@@ -1,69 +1,83 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
+#include "main.h"
 
 #define BUFFER_SIZE 1024
-
-void exitWithError(int code, char *filename) {
-    switch (code) {
-        case 97:
-            dprintf(STDERR_FILENO, "Usage: cp file_from file_to\n");
-            break;
-        case 98:
-            dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", filename);
-            break;
-        case 99:
-            dprintf(STDERR_FILENO, "Error: Can't write to %s\n", filename);
-            break;
-        case 100:
-            dprintf(STDERR_FILENO, "Error: Can't close fd %s\n", filename);
-            break;
+/**
+ * check_error - checks if files can be opened
+ * and prints an error message.
+ * 
+ * @file_from: the file descriptor of the source file.
+ * @file_to: the file descriptor of the destination file.
+ * @file_from_path: the path of the source file.
+ * @file_to_path: the path of the destination file.
+ * 
+ * Return: zero (Success)
+ */
+void check_error(int file_from, int file_to, char *file_from_path, char *file_to_path)
+{
+    if (file_from == -1)
+    {
+        dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", file_from_path);
+        exit(98);
     }
-    exit(code);
+    if (file_to == -1)
+    {
+        dprintf(STDERR_FILENO, "Error: Can't write to %s\n", file_to_path);
+        exit(99);
+    }
 }
 
-void copyFile(char *fileFrom, char *fileTo) {
-    int fdFrom, fdTo, readBytes, writeBytes, closeFd;
+/**
+ * main - copies the contents of one file to another.
+ *
+ * @argc: Number of command-line arguments.
+ * @argv: Array of command-line arguments.
+ * Return - Always returns zero (0).
+ */
+int main(int argc, char *argv[])
+{
+    int file_from, file_to, close_file;
+    ssize_t read_bytes, write_bytes;
+    char buf[BUFFER_SIZE];
 
-    fdFrom = open(fileFrom, O_RDONLY);
-    if (fdFrom == -1) {
-        exitWithError(98, fileFrom);
+    if (argc != 3)
+    {
+        dprintf(STDERR_FILENO, "Usage: cp file_from file_to\n");
+        exit(97);
     }
 
-    fdTo = open(fileTo, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
-    if (fdTo == -1) {
-        exitWithError(99, fileTo);
-    }
+    file_from = open(argv[1], O_RDONLY);
+    file_to = open(argv[2], O_CREAT | O_WRONLY | O_TRUNC | O_APPEND, 0664);
+    check_error(file_from, file_to, argv[1], argv[2]);
 
-    char buffer[BUFFER_SIZE];
-    while ((readBytes = read(fdFrom, buffer, BUFFER_SIZE)) > 0) {
-        if ((writeBytes = write(fdTo, buffer, readBytes)) != readBytes) {
-            exitWithError(99, fileTo);
+    while ((read_bytes = read(file_from, buf, BUFFER_SIZE)) > 0)
+    {
+        write_bytes = write(file_to, buf, read_bytes);
+        if (write_bytes == -1)
+        {
+            dprintf(STDERR_FILENO, "Error: Can't write to %s\n", argv[2]);
+            exit(99);
         }
-    }
-    if (readBytes == -1) {
-        exitWithError(98, fileFrom);
+        
     }
 
-    closeFd = close(fdFrom);
-    if (closeFd == -1) {
-        exitWithError(100, fileFrom);
+    if (read_bytes == -1)
+    {
+        check_error(-1, file_from, argv[1], argv[2]);
     }
 
-    closeFd = close(fdTo);
-    if (closeFd == -1) {
-        exitWithError(100, fileTo);
-    }
-}
-
-int main(int argc, char **argv) {
-    if (argc != 3) {
-        exitWithError(97, "");
+    close_file = close(file_from);
+    if (close_file == -1)
+    {
+        dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", file_from);
+        exit(100);
     }
 
-    copyFile(argv[1], argv[2]);
+    close_file = close(file_to);
+    if (close_file == -1)
+    {
+        dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", file_to);
+        exit(100);
+    }
 
-    return 0;
+    return (0);
 }
