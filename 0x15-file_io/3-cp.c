@@ -1,75 +1,99 @@
 #include "main.h"
 
 /**
-* Checks if the specified file descriptor is valid and can be used for reading or writing.
-* @fd: The file descriptor to check.
-* @mode: The mode in which the file descriptor is used (either "reading" or "writing").
-* @filename: The name of the file associated with the file descriptor (used for error messages).
-* Return - void.
-*/
-void check_fd(int fd, const char *mode, const char *filename)
-{
-if (fd == -1)
-{
-fprintf(stderr, "Error: Can't %s from/to file '%s'\n", mode, filename);
-exit(100);
-}
-}
+ * create_buf - allocates 1024 bytes for a buffer
+ * @f: The name of the file buffer is storing chars for.
+ *
+ * Return: A pointer to the newly-allocated buffer.
+ */
+char *allocate_buffer(size_t size) {
+    char *buffer = malloc(size);
 
-/**
-* copy_file - Copies the contents of one file to another.
-* @from_filename: The name of the file to copy from.
-* @to_filename: The name of the file to copy to.
-* Return -  void.
-*/
-void copy_file(const char *from_filename, const char *to_filename)
-{
-const int buf_size = 1024;
-char buf[buf_size];
-ssize_t n_read, n_written;
+    if (buffer == NULL) {
+        perror("malloc");
+        exit(EXIT_FAILURE);
+    }
 
-/*Open the input file for reading.*/
-int from_fd = open(from_filename, O_RDONLY);
-check_fd(from_fd, "read", from_filename);
-
-/*Open the output file for writing */
-int to_fd = open(to_filename, O_CREAT | O_WRONLY | O_TRUNC, 0664);
-check_fd(to_fd, "write", to_filename);
-
-/*Read from the input file and write to the output file */
-/*until there is nothing left to read.*/
-while ((n_read = read(from_fd, buf, buf_size)) > 0)
-{
-n_written = write(to_fd, buf, n_read);
-check_fd(n_written, "write", to_filename);
-}
-/**
-* check_fd - closes file descriptor parameters
-* 
-*/
-int err = close(from_fd);
-check_fd(err, "close", from_filename);
-err = close(to_fd);
-check_fd(err, "close", to_filename);
+    return buffer;
 }
 
 /**
-* Main - entry point
-* @argc: The number of command-line arguments.
-* @argv: An array of pointers to the command-line arguments.
-* Return: 0 if successful, non-zero otherwise.
-*/
+ * close_file - closes fd
+ *
+ * @fd: File descriptor to be closed.
+ */
+void close_file(int fd)
+{
+    if (close(fd) == -1)
+    {
+        perror("close");
+        exit(EXIT_FAILURE);
+    }
+}
+
+/**
+ * Main - copies the contents of one file to another
+ *
+ * @argc: Number of command-line arguments
+ * @argv: Array of command-line arguments
+ * Return - Always returns zero (0).
+ */
 int main(int argc, char *argv[])
 {
-// Check that the correct number of command-line arguments were provided.
-if (argc != 3) {
-fprintf(stderr, "Usage: %s <from_filename> <to_filename>\n", argv[0]);
-exit(98);
-}
+    int input_fd, output_fd;
+    ssize_t num_read, num_written;
+    char *buffer;
 
-// Copy the contents of the input file to the output file.
-copy_file(argv[1], argv[2]);
+    if (argc != 3)
+    {
+        fprintf(stderr, "Usage: %s <input_file> <output_file>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
 
-// Exit successfully.
-return (0);
+    buffer = allocate_buffer(BUFFER_SIZE);
+
+    input_fd = open(argv[1], O_RDONLY);
+    if (input_fd == -1)
+    {
+        perror("open");
+        free(buffer);
+        exit(EXIT_FAILURE);
+    }
+
+    output_fd = open(argv[2], O_WRONLY | O_CREAT | O_TRUNC, 0664);
+    if (output_fd == -1)
+    {
+        perror("open");
+        free(buffer);
+        close_file(input_fd);
+        exit(EXIT_FAILURE);
+    }
+
+    while ((num_read = read(input_fd, buffer, BUFFER_SIZE)) > 0)
+    {
+        num_written = write(output_fd, buffer, num_read);
+        if (num_written == -1)
+        {
+            perror("write");
+            free(buffer);
+            close_file(input_fd);
+            close_file(output_fd);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    if (num_read == -1)
+    {
+        perror("read");
+        free(buffer);
+        close_file(input_fd);
+        close_file(output_fd);
+        exit(EXIT_FAILURE);
+    }
+
+    free(buffer);
+    close_file(input_fd);
+    close_file(output_fd);
+
+    return EXIT_SUCCESS;
 }
