@@ -2,6 +2,8 @@
 #define LISTS_H
 
 #include <stdlib.h>
+#include <time.h>
+#include <stdio.h>
 
 /**
  * struct dlistint_s - Doubly linked list node
@@ -32,6 +34,11 @@ dlistint_t *insert_dnodeint_at_index(dlistint_t **h, unsigned int idx, int n);
 int delete_dnodeint_at_index(dlistint_t **head, unsigned int index);
 void create_dlistint_sample(dlistint_t **head);
 void test_delete_dnodeint_at_index(dlistint_t **head, unsigned int index);
+int main(int argc, char **argv);
+int generateRandomChar(char *username);
+int multiplyChars(char *username, int length);
+int findLargestNumber(char *username, int length);
+
 
 
 
