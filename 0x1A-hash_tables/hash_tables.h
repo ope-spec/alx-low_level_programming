@@ -7,10 +7,13 @@
 
 /**
  * struct hash_node_s - Node of a hash table
- * @key: The key, string
- * The key is unique in the HashTable
- * @value: The value corresponding to a key
- * @next: A pointer to the next node of the List
+ * @key: The unique identifier for the node
+ * @value: The data associated with the key
+ * @next: A pointer to the next node in case of collisions
+ *
+ * Description: This structure represents a node in a hash table. Each node
+ * stores a key-value pair and contains a pointer to the next node to handle
+ * collisions using chaining.
  */
 typedef struct hash_node_s
 {
@@ -23,8 +26,10 @@ typedef struct hash_node_s
  * struct hash_table_s - Hash table data structure
  * @size: The size of the array
  * @array: An array of size @size
- * Each cell of this array is a pointer to the first node of a linked list,
- * because we want our HashTable to use a Chaining collision handling
+ *
+ * Description: This structure represents a hash table. It consists of an array
+ * of size @size, where each cell is a pointer to the first node of a linked list.
+ * The linked list is used for handling collisions using chaining.
  */
 typedef struct hash_table_s
 {
@@ -32,14 +37,20 @@ typedef struct hash_table_s
 	hash_node_t **array;
 } hash_table_t;
 
+
 /**
  * struct shash_node_s - Node of a sorted hash table
- * @key: The key, string
- * The key is unique in the HashTable
- * @value: The value corresponding to a key
- * @next: A pointer to the next node of the List
- * @sprev: A pointer to the previous element of the sorted linked list
- * @snext: A pointer to the next element of the sorted linked list
+ * @key: The unique key associated with the node
+ * @value: The value corresponding to the key
+ * @next: A pointer to the next node of the list
+ * @sprev: A pointer to the previous node in the sorted linked list
+ * @snext: A pointer to the next node in the sorted linked list
+ *
+ * Description: This structure represents a node in a sorted hash table.
+ * Each node contains a key-value pair and pointers to the next and previous
+ * nodes for the standard linked list functionality. Additionally, it includes
+ * pointers to the previous and next nodes for the sorted linked list to maintain
+ * the sorted order of elements.
  */
 typedef struct shash_node_s
 {
@@ -50,14 +61,18 @@ typedef struct shash_node_s
 	struct shash_node_s *snext;
 } shash_node_t;
 
+
 /**
  * struct shash_table_s - Sorted hash table data structure
  * @size: The size of the array
- * @array: An array of size @size
- * Each cell of this array is a pointer to the first node of a linked list,
- * because we want our HashTable to use a Chaining collision handling
- * @shead: A pointer to the first element of the sorted linked list
- * @stail: A pointer to the last element of the sorted linked list
+ * @array: An array of size @size. Each cell of this array is a pointer to the first node of a linked list.
+ *         The linked list is used for collision handling with chaining.
+ * @shead: A pointer to the first element of the sorted linked list.
+ * @stail: A pointer to the last element of the sorted linked list.
+ *
+ * Description: This structure represents a sorted hash table.
+ * It contains an array of size @size, where each cell of the array is a
+ * pointer to the first node of a linked list.
  */
 typedef struct shash_table_s
 {
@@ -66,6 +81,7 @@ typedef struct shash_table_s
 	shash_node_t *shead;
 	shash_node_t *stail;
 } shash_table_t;
+
 
 hash_table_t *hash_table_create(unsigned long int size);
 unsigned long int hash_djb2(const unsigned char *str);
