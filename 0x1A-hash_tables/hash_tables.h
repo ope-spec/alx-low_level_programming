@@ -27,8 +27,9 @@ typedef struct hash_node_s
  * @size: The size of the array
  * @array: An array of size @size
  *
- * Description: This structure represents a hash table. It consists of an array
- * of size @size, where each cell is a pointer to the first node of a linked list.
+ * Description: This structure represents a hash table.
+ * It consists of an array of size @size, where each cell is a
+ * pointer to the first node of a linked list.
  * The linked list is used for handling collisions using chaining.
  */
 typedef struct hash_table_s
@@ -49,8 +50,8 @@ typedef struct hash_table_s
  * Description: This structure represents a node in a sorted hash table.
  * Each node contains a key-value pair and pointers to the next and previous
  * nodes for the standard linked list functionality. Additionally, it includes
- * pointers to the previous and next nodes for the sorted linked list to maintain
- * the sorted order of elements.
+ * pointers to the previous and next nodes for the sorted linked list
+ * to maintain the sorted order of elements.
  */
 typedef struct shash_node_s
 {
@@ -65,8 +66,9 @@ typedef struct shash_node_s
 /**
  * struct shash_table_s - Sorted hash table data structure
  * @size: The size of the array
- * @array: An array of size @size. Each cell of this array is a pointer to the first node of a linked list.
- *         The linked list is used for collision handling with chaining.
+ * @array: An array of size @size.
+ * Each cell of this array is a pointer to the first node of a linked list.
+ * The linked list is used for collision handling with chaining.
  * @shead: A pointer to the first element of the sorted linked list.
  * @stail: A pointer to the last element of the sorted linked list.
  *
