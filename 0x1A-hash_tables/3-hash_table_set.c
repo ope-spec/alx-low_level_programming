@@ -4,7 +4,7 @@
  * hash_table_set - Add or update an element in a hash table.
  * @ht: A pointer to the hash table.
  * @key: The key to add - key cannot be an empty string.
- * @keyValue: The value associated with key.
+ * @value: The value associated with key.
  *
  * Return: On success, returns 1. On failure, returns 0.
  *
@@ -15,16 +15,16 @@
  * the given key-value pair and adds it to the appropriate index
  * in the hash table's array using the key's hash value.
  */
-int hash_table_set(hash_table_t *ht, const char *key, const char *keyValue)
+int hash_table_set(hash_table_t *ht, const char *key, const char *value)
 {
     hash_node_t *new_node;
     char *value_copy;
     unsigned long int index, i;
 
-    if (ht == NULL || key == NULL || *key == '\0' || keyValue == NULL)
+    if (ht == NULL || key == NULL || *key == '\0' || value == NULL)
         return (0);
 
-    value_copy = strdup(keyValue);
+    value_copy = strdup(value);
     if (value_copy == NULL)
         return (0);
 
