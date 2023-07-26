@@ -4,15 +4,20 @@ OBJ = $(SRC:.c=.o)
 NAME = school
 RM = rm -f
 
+# Rule to build the executable
 all: $(OBJ)
 	$(CC) $(OBJ) -o $(NAME)
 
+# Rule to clean up generated files and temporary files
 clean:
 	$(RM) *~ $(NAME)
 
+# Rule to remove object files
 oclean:
 	$(RM) $(OBJ)
 
+# Rule to remove all generated files and object files
 fclean: clean oclean
 
+# Rule to recompile everything from scratch
 re: fclean all
